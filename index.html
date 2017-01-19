@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,minimal-ui">
+    <meta name="format-detection" content="telephone=no">
+    <title>HTML5APP阅读器</title>
+    <link rel="shortcut icon" href="lisw.ico"/>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="font/iconfont.css"/>
+    <link rel="stylesheet" href="font/font_baitian/iconfont.css"/>
+    <link rel="stylesheet" href="css/index.css"/>
+
+
+</head>
+<body>
+<!--头部-->
+<div class="top-nav" id="js_top_nav" style="display: none">
+    <div class="top-nav-warp clearfix">
+        <div class="iconfont icon-fanhui fl"></div>
+        <p class="nav-title fl">返回书架</p>
+    </div>
+</div>
+<!--内容-->
+<div class="container" id="js_container">
+
+</div>
+<!--上一章 下一章 -->
+<div class="m-button-bar">
+    <ul class="u-tab clearfix">
+        <li class="prev_button fl" id="js_up">
+            上一章
+        </li>
+        <li class="next_button fl" id="js_next">
+            下一章
+        </li>
+    </ul>
+</div>
+<!--底部-->
+<div class="footer" id="js_footer" style="display: none">
+    <div class="footer-left">
+        <div class="iconfont icon-mulu"></div>
+        <div>目录</div>
+    </div>
+    <div class="footer-middle" id="js_ziti">
+        <div class="iconfont icon-ziti" id="js_footer_middle_color"></div>
+        <div>字体</div>
+    </div>
+    <div class="footer-right clearfix" id="js_qie_huan">
+        <div class="night" id="js_night">
+            <div class="iconfont icon-yueliang"></div>
+            <div>夜间</div>
+        </div>
+        <div class="with" id="js_bai_tian">
+            <div class="iconfont icon-baitianqing"></div>
+            <div>白天</div>
+        </div>
+    </div>
+</div>
+<!--改变颜色-->
+<div class="yan-se" id="js_yan_se" style="display: none">
+    <div class="yan-se-zi-hao clearfix">
+        <div class="zi fl">字号</div>
+        <div class="text fl" id="js_big_txt">大</div>
+        <div class="text fl" id="js_small_txt">小</div>
+    </div>
+    <div class="yan-se-bg clearfix">
+        <div class="bg fl">背景</div>
+        <ul class="color fl" id="js_bg_color">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+</div>
+<!--中间空盒子-->
+<div class="middle" id="js_kong"></div>
+
+
+<script src="lib/zepto.min.js"></script>
+<script>
+    window.jQuery = $;
+</script>
+<script src="js/jquery.base64.js"></script>
+<script src="js/jquery.jsonp.js"></script>
+<script>
+    $(function () {
+
+        //入口函数
+        main();
+        function main() {
+            interaction();
+
+        }
+
+        //本地存储
+        var pre = 'lsw';
+        //防止复用
+        function getLocal(key) {
+            return localStorage.getItem(pre + key);
+        }
+
+        function setLocal(key, val) {
+            return localStorage.setItem(pre + key, val)
+        }
+
+        //获取DOM对象
+
+        var Dom = {
+            kong: $('#js_kong'),
+            js_footer: $('#js_footer'),
+            js_top_nav: $('#js_top_nav'),
+            js_yan_se: $('#js_yan_se'),
+            js_ziti: $('#js_ziti'),
+            js_footer_middle_color: $('#js_footer_middle_color'),
+            js_container: $('#js_container'),
+            js_bai_tian: $('#js_bai_tian'),
+            js_night: $('#js_night'),
+            body: $('body'),
+
+        };
+
+        //页面初始化
+
+        var initFontSize = parseInt(getLocal('font-size')) || 14;
+        var bgColor = getLocal('background-color') || '#E9DFC7';
+
+        Dom.js_container.css('font-size', initFontSize);
+        Dom.body.css('background-color', bgColor);
+
+
+        //交互函数
+        function interaction() {
+
+
+            $('#js_kong').click(function () {
+                if (Dom.js_footer.css('display') == 'none') {
+                    Dom.js_footer.show();
+                    Dom.js_top_nav.show();
+                } else {
+                    Dom.js_footer.hide();
+                    Dom.js_top_nav.hide();
+                    Dom.js_yan_se.hide();
+                    Dom.js_footer_middle_color.removeClass('action');
+                }
+            });
+            //滚动隐藏
+            $(window).scroll(function () {
+                Dom.js_footer.hide();
+                Dom.js_top_nav.hide();
+                Dom.js_yan_se.hide()
+            });
+
+            //点击字体显示隐藏
+            $('#js_ziti').click(function () {
+                if (Dom.js_yan_se.css('display') == 'none') {
+                    Dom.js_yan_se.show();
+                    Dom.js_footer_middle_color.addClass('action')
+                } else {
+                    Dom.js_yan_se.hide();
+                    Dom.js_footer_middle_color.removeClass('action');
+                }
+            });
+
+            //点击字体变大
+            $('#js_big_txt').click(function () {
+                initFontSize++;
+                if (initFontSize > 25) {
+                    return;
+                }
+                Dom.js_container.css('font-size', initFontSize);
+                setLocal('font-size', initFontSize)
+            });
+            //点击字体变小
+            $('#js_small_txt').click(function () {
+                initFontSize--;
+                if (initFontSize < 12) {
+                    return;
+                }
+                Dom.js_container.css('font-size', initFontSize);
+                setLocal('font-size', initFontSize)
+            });
+
+            //背景颜色
+            var lis = $('#js_bg_color').children();
+            for (var i = 0, len = lis.length; i < len; i++) {
+
+                lis[i].onclick = function () {
+
+                    var bgColor = $(this).css('background-color');
+                    Dom.body.css('background-color', bgColor);
+                    setLocal('background-color', bgColor);
+                }
+            }
+
+            //夜间和白天切换
+            var night = $('#js_qie_huan');
+            night.on('click', function () {
+                if (Dom.js_night.css('display') == 'none') {
+                    Dom.js_bai_tian.hide();
+                    Dom.js_night.show();
+                    Dom.body.css('background-color', bgColor);
+                } else {
+                    Dom.js_night.hide();
+                    Dom.js_bai_tian.show();
+                    Dom.body.css({
+                        'background-color': '#0F1410',
+                        'color': '#4E534F'
+                    });
+
+                }
+            });
+
+
+        }
+
+
+        //上一页
+        var Chapter_id = 4;
+        //本地存储 如果有记录就用记录的
+        if (getLocal('last_id')) {
+            Chapter_id = getLocal('last_id');
+        }
+
+        $('#js_up').click(function () {
+            Chapter_id--;
+            if (Chapter_id == 1) {
+                Chapter_id = 8;
+            }
+            setLocal('last_id',Chapter_id);
+            $(window).scrollTop(0);
+            content(Chapter_id);
+        });
+        //下一页
+        $('#js_next').click(function () {
+            Chapter_id++;
+            if (Chapter_id == 8) {
+                Chapter_id = 1;
+            }
+            setLocal('last_id',Chapter_id);
+            $(window).scrollTop(0);
+            content(Chapter_id);
+        });
+
+
+        content(Chapter_id);
+        //页面ajax
+        function content(id) {
+            $.get("data/data" + Chapter_id + ".json",
+                    function (data) {
+                        if (data.result == 0) {
+                            var url = data.jsonp;
+                            getBSONP(url, function (data) {
+                                var jsonObj = JSON.parse(data);
+                                var html = "<h4>" + jsonObj.t + "</h4>";
+                                for (var i = 0; i < jsonObj.p.length; i++) {
+                                    html += "<p>" + jsonObj.p[i] + "</p>";
+                                }
+                                $('#js_container').html(html)
+                            })
+
+                        }
+                    }, 'json');
+        }
+
+
+        //数据解密
+        function getBSONP(url, callback) {
+            return $.jsonp({
+                url: url,
+                cache: true,
+                callback: "duokan_fiction_chapter",
+                success: function (result) {
+                    var data = $.base64.decode(result);
+                    var json = decodeURIComponent(escape(data));
+                    callback(json);
+                }
+            });
+
+        };
+
+
+    });
+</script>
+</body>
